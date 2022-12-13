@@ -7,6 +7,8 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import LocalStorage from "../class/LocalStorage";
 
+import User from "../class/User";
+
 import login_style from "../styles/login_styles";
 import colors from "../styles/colors";
 import { Image } from "react-native";
@@ -30,6 +32,12 @@ const Main = () =>{
     
                 if(!(token == null)){
                     axios.defaults.headers.common['Authorization'] = `bearer ${token}`
+
+                    const default_sheet_aux = await localStorage.getData("@DEFAULT_SHEET");
+                    if(default_sheet_aux && default_sheet_aux !== "NONE" && default_sheet_aux !== ""){
+                        User.setDefaultSpreadShet(default_sheet_aux);
+                    }
+
                     navigation.navigate("HomeIndex")
                 }else{
                     navigation.navigate("Login")

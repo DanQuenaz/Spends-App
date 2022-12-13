@@ -36,7 +36,11 @@ const Home = () =>{
     moment.locale('pt-br');
     const ONESIGNAL_APP_ID = 'f68d22b5-f3a3-49ec-9d43-472418527c9b'
 
-    const [mes_selecionado, setMesSelecionado] = useState(parseInt(moment().subtract(0, "month").format('MM')));
+    const [mes_ano_selecionado, setMesSelecionado] = useState({
+        mes: parseInt(moment().subtract(0, "month").format('MM')),
+        ano: parseInt(moment().subtract(0, "year").format('YYYY'))
+    });
+    const [refresh_filtro_data, setRefreshFiltroData] = useState(false);
     const [corpo, setCorpo] = useState(null);
     const [user_id, setUserId] = useState(null);
     const [nickname, setNickName] = useState("");
@@ -100,7 +104,7 @@ const Home = () =>{
                 const body_request = {
                     "spread_sheet_id": parseInt(default_sheet_aux)
                 };
-                const result = await useApi(`/spends?spread_sheet_id=${default_sheet_aux}&month=${mes_selecionado}`, body_request, "GET");
+                const result = await useApi(`/spends?spread_sheet_id=${default_sheet_aux}&month=${mes_ano_selecionado.mes}&year=${mes_ano_selecionado.ano}`, body_request, "GET");
                 if(result.status == 200){
                     setTotalGastos(formatToReal(calculaTotalGastos( result.data) ));
                     if(result.data[0]){
@@ -228,7 +232,7 @@ const Home = () =>{
             await loadSpends();
         }
         fetchData();
-    }, [mes_selecionado])
+    }, [mes_ano_selecionado])
 
     useFocusEffect(
         React.useCallback(() => {
@@ -318,7 +322,7 @@ const Home = () =>{
                 
                 
                     <>
-                    <MonthSelector setMesSelecionado = {setMesSelecionado} mes_selecionado = {mes_selecionado}/>
+                    <MonthSelector setMesSelecionado = {setMesSelecionado} mes_ano_selecionado = {mes_ano_selecionado}/>
                     {corpo}
                     <BotaoAdicionar
                         funcao = {openCadastroSpend}

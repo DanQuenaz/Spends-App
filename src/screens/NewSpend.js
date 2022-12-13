@@ -83,14 +83,16 @@ const NewSpend = () =>{
                 if(parcelas > 1){
                     let valor_parcela = valor_spend/parcelas;
                     for(let i =0; i<parcelas; i++){
-                        let data_aux = data_despesa
+                        var data_aux = new Date(data_despesa);
+                        console.log(i, data_aux);
                         bodyRequest.installments_info.push({
                             description: descricao_spend + ` ${i+1}/${parcelas}`,
                             value: valor_parcela,
-                            date: new Date(data_aux.setMonth(data_aux.getMonth()+1))
+                            date: data_aux.setMonth(data_aux.getMonth()+i)
                         });
                     };
                         try{
+                            console.log(bodyRequest)
                             const result = await useApi("/spends", bodyRequest, "POST");
                             if(result.status == 200){
                                 navigation.navigate("Home");

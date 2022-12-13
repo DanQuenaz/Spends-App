@@ -20,7 +20,10 @@ const Charts = () =>{
     
     const [grafico, setGrafico] = useState(null);
     
-    const [mes_selecionado, setMesSelecionado] = useState(parseInt(moment().subtract(0, "month").format('MM')));
+    const [mes_ano_selecionado, setMesSelecionado] = useState({
+        mes: parseInt(moment().subtract(0, "month").format('MM')),
+        ano: parseInt(moment().subtract(0, "year").format('YYYY'))
+    });
     const [spread_sheet_id, setSpreadSheetId] = useState();
     const [dados_tag, setDadosTag] = useState([]);
     const [dados_user, setDadosUser] = useState([]);
@@ -172,7 +175,7 @@ const Charts = () =>{
         const fetchData = async () =>{
             try{
                 
-                const result = await useApi(`/charts?spread_sheet_id=${spread_sheet_id}&type=${tipo_grafico}&month=${mes_selecionado}`, null, 'GET');
+                const result = await useApi(`/charts?spread_sheet_id=${spread_sheet_id}&type=${tipo_grafico}&month=${mes_ano_selecionado.mes}&year=${mes_ano_selecionado.ano}`, null, 'GET');
                 if(result.status == 200){
                     console.log(result.data)
                     if(tipo_grafico == 'tag'){
@@ -230,7 +233,7 @@ const Charts = () =>{
             } 
         };
         fetchData();
-    },[tipo_grafico, mes_selecionado, spread_sheet_id]);
+    },[tipo_grafico, mes_ano_selecionado, spread_sheet_id]);
 
     useEffect(()=>{
         atualizaGraficos();
@@ -252,7 +255,7 @@ const Charts = () =>{
                                 setValue={setTipoGrafico}
                                 setItems={setItems}
                             />
-                            <MonthSelector setMesSelecionado = {setMesSelecionado} mes_selecionado = {mes_selecionado}/>
+                            <MonthSelector setMesSelecionado = {setMesSelecionado} mes_ano_selecionado = {mes_ano_selecionado}/>
                         
                         </View>
                     </BackCard>
