@@ -23,6 +23,7 @@ import DTPicker from "../components/DTPicker/DTPicker";
 import { stringDate } from './../functions/stringDate';
 import DropDownPicker from "react-native-dropdown-picker";
 import { formatToReal } from './../functions/number';
+import { Use } from "react-native-svg";
 
 const NewSpend = () =>{
 
@@ -64,6 +65,17 @@ const NewSpend = () =>{
     useEffect(()=>{
         setUserId( User.getUser().user_id );
         loadTags();
+
+        if(route.params.atualizaDespesa){
+            console.log(route.params)
+            setValorSpend(route.params.valor);
+            setDescricaoSpend(route.params.descricao);
+            setGastoFixo(route.params.fixado);
+            setValueTags(route.params.tag);
+            setDataDepesa(route.params.data);
+            setParcelas(route.params.parcelas+"");
+        };
+        
     }, []);
 
     useEffect(()=>{
@@ -72,12 +84,13 @@ const NewSpend = () =>{
             if((valor_spend !== "" && valor_spend != null) && descricao_spend !== ""){
                 let bodyRequest = {
                     owner_id: user_id,
-                    spread_sheet_id: parseInt(route.params.default_sheet),
+                    spread_sheet_id: parseInt(User.getDefaultSpreadSheet()),
                     tag_id: value_tags,
                     fixed: gasto_fixo,
                     total_value: valor_spend,
+                    initial_date: data_despesa,
                     installments:parcelas,
-                    notification: `${User.getUser().NICKNAME} cadastrou ${descricao_spend} - ${formatToReal(valor_spend)} (${parcelas}x ${formatToReal(valor_spend/parcelas)})`,
+                    notification: `${User.getUser().nickname} cadastrou ${descricao_spend} - ${formatToReal(valor_spend)} (${parcelas}x ${formatToReal(valor_spend/parcelas)})`,
                     installments_info:[]
                 };
                 if(parcelas > 1){
@@ -106,20 +119,11 @@ const NewSpend = () =>{
                     
                 }
                 else{
-                    const bodyRequest = {
-                        owner_id: user_id,
-                        spread_sheet_id: parseInt(route.params.default_sheet),
-                        tag_id: value_tags,
-                        fixed: gasto_fixo,
-                        total_value: valor_spend,
-                        installments:parcelas,
-                        notification: `${User.getUser().NICKNAME} cadastrou ${descricao_spend} - ${formatToReal(valor_spend)} `,
-                        installments_info:[{
-                            description: descricao_spend,
-                            value: valor_spend,
-                            date: data_despesa
-                        }]
-                    };
+                    bodyRequest.installments_info.push({
+                        description: descricao_spend,
+                        value: valor_spend,
+                        date: data_despesa
+                    })
                     try{
                         const result = await useApi("/spends", bodyRequest, "POST");
                         if(result.status == 200){
@@ -132,14 +136,7 @@ const NewSpend = () =>{
                         Alert.alert("Erro", "Falha ao cadastrar despesa"); 
                     } 
 
-                }
-                
-                
-
-                
-
-                
-                
+                } 
             }{
                 if(num_cadastro>0){
                     
@@ -202,7 +199,7 @@ const NewSpend = () =>{
                         </BackCard>
                     </View>
 
-                    <View style={{flex:0.25, paddingBottom:5}}>
+                    <View style={{flex:0.3, paddingBottom:5}}>
                         <BackCard>
                             <View>
                                 <Text style={{paddingLeft:5, fontSize:22, paddingBottom:10, marginRight:10, color:colors.branco}}>Descrição</Text>
@@ -224,6 +221,7 @@ const NewSpend = () =>{
                                                         borderRadius:8
                                                                 
                                                     }}
+                                            value={descricao_spend}
                                             placeholderTextColor={colors.branco}
                                             onChangeText={(text) => { setDescricaoSpend(text) } }
                                         />
@@ -233,9 +231,10 @@ const NewSpend = () =>{
                             <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginHorizontal:5}}>
                                 <DTPicker setDataDepesa={setDataDepesa}/>
                                 <TextInput 
-                                    style={{backgroundColor:colors.branco, borderRadius:8}}
+                                    style={{backgroundColor:colors.branco, borderRadius:8, textAlign:'center'}}
                                     placeholder="Parcelas"
                                     keyboardType="numeric"
+                                    value={parcelas}
                                     onChangeText={(text)=>{setParcelas(text)}}
                                 />
                             </View>
@@ -245,7 +244,7 @@ const NewSpend = () =>{
                     </View>
                     
                     
-                    <View style={{flex:0.25}}>
+                    <View style={{flex:0.2}}>
                         <BackCard>
 
                             <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>

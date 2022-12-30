@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useRef} from "react";
 import { Text, SafeAreaView, TouchableOpacity, Alert, View, StyleSheet } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { FlatList } from "react-native-gesture-handler";
@@ -40,20 +40,20 @@ const Home = () =>{
         mes: parseInt(moment().subtract(0, "month").format('MM')),
         ano: parseInt(moment().subtract(0, "year").format('YYYY'))
     });
-    const [refresh_filtro_data, setRefreshFiltroData] = useState(false);
+    
     const [corpo, setCorpo] = useState(null);
     const [user_id, setUserId] = useState(null);
     const [nickname, setNickName] = useState("");
     const [default_sheet, setDefaultSheet] = useState(0);
     const [tags, setTags] = useState([]);
-    const [spend_editing, setSpendEditing] = useState(-1);
+    const [spend_editing, setSpendEditing] = useState(false);
     
     const [total_gastos, setTotalGastos] = useState("...");
 
     const navigation = useNavigation();
-
-   
     const localStorage = new LocalStorage();
+
+    const atualizaFiltroMeses = useRef();
 
     const calculaTotalGastos = (data) =>{
         var total_aux = 0;
@@ -97,6 +97,7 @@ const Home = () =>{
     const loadSpends = async () =>{
         
         try{
+            atualizaFiltroMeses.current.geraMeses();
             const default_sheet_aux = await localStorage.getData("@DEFAULT_SHEET");
             if(default_sheet_aux && default_sheet_aux !== "NONE" && default_sheet_aux !== ""){
                 setDefaultSheet(default_sheet_aux);
@@ -128,7 +129,7 @@ const Home = () =>{
                                         </View>
                                         <View style={{flex:1, flexDirection:'column', borderLeftColor:colors.cinza_1, borderLeftWidth:1, alignItems:'flex-end', justifyContent:'space-between'}} >
                                             <TouchableOpacity onPress={()=>{
-                                                navigation.navigate("EditSpend", {spend_id:item.SPEND_ID, valor:item.VALUE, descricao:item.DESCRIPTION, tag:item.TAG_ID, fixado:item.FIXED==1})
+                                                navigation.navigate("NewSpend", {spend_id:item.SPEND_ID, valor:item.VALUE, descricao:item.DESCRIPTION, tag:item.TAG_ID, fixado:item.FIXED==1, data: item.INITIAL_DATE, parcelas: item.TOTAL_INSTALLMENTS, atualizaDespesa:true})
                                             }}>
                                                 <Icon name='edit' size={18}/>
                                             </TouchableOpacity>
@@ -260,7 +261,7 @@ const Home = () =>{
         const default_sheet_aux = await localStorage.getData("@DEFAULT_SHEET");
         if(default_sheet_aux && default_sheet_aux !== "NONE" && default_sheet_aux !== ""){
             setDefaultSheet(default_sheet_aux);
-            navigation.navigate('NewSpend', {default_sheet, tags})
+            navigation.navigate('NewSpend', {atualizaDespesa:false})
         }
        
     }
@@ -319,22 +320,12 @@ const Home = () =>{
             </LinearGradient>
 
             <View style={home_style.container_under}>
-                
-                
-                    <>
-                    <MonthSelector setMesSelecionado = {setMesSelecionado} mes_ano_selecionado = {mes_ano_selecionado}/>
-                    {corpo}
-                    <BotaoAdicionar
-                        funcao = {openCadastroSpend}
-                    />
-                    </>
-
-                
-                
-                
+                <MonthSelector ref={atualizaFiltroMeses} setMesSelecionado = {setMesSelecionado} mes_ano_selecionado = {mes_ano_selecionado}/>
+                {corpo}
+                <BotaoAdicionar
+                    funcao = {openCadastroSpend}
+                />
             </View>
-            
-            
         </SafeAreaView>
     )
 }

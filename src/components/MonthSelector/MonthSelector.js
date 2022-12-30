@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useImperativeHandle, forwardRef} from "react";
 import { Text, View, FlatList, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
 
 import moment from "moment";
@@ -8,9 +8,12 @@ import { useApi } from "../../Hooks/useApi";
 import User from "../../class/User";
 
 
-const MonthSelector = (props) =>{
+const MonthSelector = (props, ref) =>{
     const [ultimos_meses, setUltimosMeses] = useState([]);
-    const [refresh, setRefresh] = useState(false);
+
+    useImperativeHandle(ref, () => ({
+        geraMeses: () => { geraMeses() }
+    }))
 
     const geraMeses = async ()=>{
         try{
@@ -35,14 +38,19 @@ const MonthSelector = (props) =>{
                 console.log("Erro")
             }
         }catch(e){
-            console.log(e)
+            console.log("Erro aqui", e)
         }
 
     };
 
-    // useEffect(()=>geraMeses(), []);
+    useEffect(()=>{
+        const fetchData = ()=>{
+            geraMeses()
+        };
+        fetchData();
+    }, []);
 
-    useEffect(()=>{geraMeses();}, [refresh]);
+    
 
     return(
         <View>
@@ -77,6 +85,6 @@ const styles = StyleSheet.create({
 
 });
 
-export default MonthSelector;
+export default forwardRef(MonthSelector);
 
 
